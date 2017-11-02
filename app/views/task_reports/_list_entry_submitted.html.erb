@@ -1,0 +1,19 @@
+    <td><%= "#{@report_user.name}" %></td>
+    <td><%= "#{date.strftime("%A, %d-%b-%y")}" %><br />
+        <span class="small">
+          <%= @task_reports[date].time_from.strftime("%l:%M%P") %> - <%= @task_reports[date].time_to.strftime("%l:%M%P") %>
+        </span>
+    </td>
+    <td>Submitted</td>
+    <td><%= @task_reports[date].total_working_hours %></td>
+    <td><%= @task_reports[date].total_logged_hours %></td>
+    <td><%= @task_reports[date].total_free_hours %></td>
+    <td class="centered">
+      <% unless off_day? date %>
+          <a href="<%="#{task_report_path @task_reports[date]}"%>" class="icon icon-report">&nbsp;</a>
+
+          <% if !modification_time_expired? date and @task_reports[date].user_id == User.current.id %>
+              <a href="<%="#{edit_task_report_path @task_reports[date]}"%>" class="icon icon-edit">&nbsp;</a>
+          <% end %>
+      <% end %>
+    </td>

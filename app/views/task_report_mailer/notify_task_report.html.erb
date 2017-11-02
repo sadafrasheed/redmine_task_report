@@ -1,0 +1,32 @@
+
+Total Working Hours: <%= @task_report.total_working_hours %><br />
+Total Logged Hours: <%= @task_report.total_logged_hours %><br />
+Total Free Hours: <%= @task_report.total_free_hours %><br />
+<br />
+*******************************<br />
+<b>=> Tasks Report</b><br />
+*******************************<br /><br />
+<%
+    #already_displayed = []
+unless @time_entries.blank?
+    @time_entries.each do |entry|
+        #unless already_displayed.include?entry.issue_id
+    %>
+<b><%= entry.hours %> hours @ <%= link_to( entry.issue_id, issue_url(entry.issue)   )  %>:  <%= entry.issue.subject %></b><br />
+<%= "Activity: #{entry.activity.name} | Comments: #{entry.comments} | Project:" %>  <%= link_to( entry.issue.project.name, project_url(entry.issue.project.id)) %><br /><br />
+
+    <%
+        #end
+        #already_displayed << entry.issue_id
+    end
+end
+%>
+<br />
+
+
+*******************************<br />
+=> Other Information<br />
+*******************************<br />
+Short Leaves: <%= @task_report.total_short_leaves %><br />
+Extra Hours: <%= @task_report.total_extra_hours %><br />
+Remarks: <%= @task_report.remarks %><br />

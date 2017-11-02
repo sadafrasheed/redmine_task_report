@@ -1,0 +1,107 @@
+<%
+   time = @day
+   title = "View Daily Task Report for #{time.strftime "%A, %d-%b-%y"}"
+   html_title( title )
+
+%>
+
+<h2><%= title %></h2>
+
+
+  <div class="daily-form-wrapper">
+
+    <%= form_tag task_reports_daily_path, :method => 'get', :id=>'daily-reports-form'  do %>
+
+        <div class="form-control">
+
+          <div class="previous-day">
+            <a href="<%="#{task_reports_daily_path :day => @day - 1.day }"%>" class="icon icon-left">Previous Day</a>
+          </div>
+          <% unless @day == (Date.today - 1.day) %>
+              <div class="next-day">
+                <a href="<%="#{task_reports_daily_path :day => @day + 1.day }"%>" class="icon icon-right">Next Day</a>
+              </div>
+          <% end %>
+
+          <div class="day-selector">
+              <%= label_tag :date_range,'Date Range', :class => ' control-label' %>
+              <div class="control-wrapper">
+                  <%= text_field_tag :day, @day.strftime("%d-%b-%Y"), :class => ' datepicker'  %>
+              </div>
+            <a class="icon icon-checked" href="#" onclick="document.getElementById('daily-reports-form').submit();return false;">Apply</a>
+            <a href="<%="#{task_reports_daily_path}"%>" class="icon icon-reload">Reset</a>
+          </div>
+        </div>
+
+    <% end %>
+
+  </div>
+
+
+
+
+<hr />
+
+<%
+   three_days_ago = 2.days.ago.to_date
+
+%>
+
+<table class="table-fill">
+  <tr>
+    <th>Sr#</th>
+    <th>Task Report By</th>
+    <!--<th>Date</th>-->
+    <th>Time In</th>
+    <th>Time Out</th>
+    <th>Working Hours</th>
+    <th>Logged Hours</th>
+    <th>Free Hours</th>
+    <th></th>
+  </tr>
+  <% i = 0 %>
+  <% @task_reports.each do |report| %>
+
+      <%
+         css_class = ""
+         result = compare_hours(report.total_logged_hours)
+         if result == -1
+           css_class = "less-hours"
+         end
+
+
+      %>
+
+      <tr class="<%= css_class %>">
+        <td><%= "#{i+= 1}" %></td>
+        <td><%= "#{report.user.name}" %></td>
+        <!--<td><%= "#{@day.strftime("%A, %d-%b-%y")}" %></td>-->
+        <td><%= report.time_from.strftime("%l:%M%P") %></td>
+        <td><%= report.time_to.strftime("%l:%M%P") %></td>
+        <td><%= report.total_working_hours %></td>
+        <td><%= report.total_logged_hours %></td>
+        <td><%= report.total_free_hours %></td>
+        <td class="centered">
+            <a href="<%="#{task_report_path report}"%>" class="icon icon-report" target="_blank">&nbsp;</a>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+
+
+<br />
+
+
+
+
+
+
+
+
+
+<% content_for :sidebar do %>
+    <%  render :partial => 'issues/sidebar' %>
+<% end %>
+
+<%= render :partial => 'task_reports/assets' %>

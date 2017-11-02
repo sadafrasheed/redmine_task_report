@@ -1,0 +1,238 @@
+<%
+
+   time = @task_report.report_for_day.to_datetime
+   title = "View Daily Task Report for #{time.strftime "%A, %d-%b-%y"}"
+   html_title( title )
+
+%>
+
+
+<h2><%= title %></h2>
+
+
+
+
+<% required_hours = "#{required_office_hours} hrs" %>
+
+
+<div class="show-wrapper">
+
+
+    <div id="task-report-entries">
+
+      <div class="form-control">
+        <label>Report By</label>
+        <div class="control-wrapper">
+          <%= @task_report.user.name %>
+        </div>
+      </div>
+
+      <div class="form-control">
+        <label>Date</label>
+        <div class="control-wrapper">
+          <%= @task_report.report_for_day.strftime("%d-%b-%Y") %>
+        </div>
+      </div>
+
+      <div class="form-control">
+        <label>Time</label>
+        <div class="control-wrapper"><div class="control-group">
+          <%= @task_report.time_from.strftime("%l:%M%P") %> -
+          <%= @task_report.time_to.strftime("%l:%M%P") %>
+          (<%= @task_report.total_working_hours %>)
+        </div></div>
+      </div>
+
+
+      <div class="more-options-wrapper" style=" <%= "display:block" unless @task_report.task_report_short_leaves.blank? or @task_report.task_report_extra_hours.blank?  %> ">
+
+        <% unless @task_report.task_report_short_leaves.blank? %>
+            <div class="short-leaves-section form-control">
+              <div class="">
+                <label>I have availed a short leave</label>
+              </div>
+              <div class="short-leave-controls-wrapper">
+                <% @task_report.task_report_short_leaves.each do |sl| %>
+                    <div class="">
+                      <label>When</label>
+                      <div class="control-wrapper">
+                        <div class="control-group">
+                          <%= sl.start_time.strftime("%l:%M%P")  %> -
+                          <%= sl.end_time.strftime("%l:%M%P")  %>
+                        </div>
+                      </div>
+                    </div>
+                <% end %>
+              </div>
+            </div>
+        <% end %>
+
+        <% unless @task_report.task_report_extra_hours.blank? %>
+            <div class="extra-hours-section form-control">
+              <div class="">
+                <label>I have worked extra today</label>
+              </div>
+              <div class="extra-hours-controls-wrapper">
+                <% @task_report.task_report_extra_hours.each do |eh| %>
+                    <div class="">
+                      <label>When</label>
+                      <div class="control-wrapper">
+                        <div class="control-group">
+                          <%= eh.start_time.strftime("%l:%M%P")  %> -
+                          <%= eh.end_time.strftime("%l:%M%P")  %>
+                        </div>
+                      </div>
+                    </div>
+                <% end %>
+              </div>
+            </div>
+        <% end %>
+
+      </div>
+
+
+
+
+
+    </div>
+    <div id="task-report-summary-wrapper">
+      <div id="task-report-summary">
+        <div id="working-hours">
+          <span class="label">Working Hours:</span>
+          <span><%= @task_report.total_working_hours %></span>
+        </div>
+        <!--<div id="required-hours">
+          <span class="label">Required Hours:</span>
+          <span><%= required_hours %></span>
+        </div>-->
+
+        <% unless empty_time? @task_report.total_short_leaves %>
+            <div id="short-leaves-logged">
+              <span class="label">Short Leaves:</span>
+              <span><%= @task_report.total_short_leaves %></span>
+            </div>
+        <% end %>
+
+        <% unless empty_time? @task_report.total_extra_hours %>
+        <div id="extra-hours-logged">
+          <span class="label">Extra Hours:</span>
+          <span><%= @task_report.total_extra_hours %></span>
+        </div>
+        <% end %>
+
+        <div id="logged-hours">
+            <span class="label">Logged Hours:</span>
+            <span><%= @task_report.total_logged_hours %></span>
+        </div>
+
+        <% unless empty_time? @task_report.total_free_hours %>
+        <div id="free-hours">
+          <span class="label">Free Hours:</span>
+          <span><%= @task_report.total_free_hours %></span>
+        </div>
+        <% end %>
+
+
+        <hr />
+        <% if @task_report.total_logged_hours.slice(0,1).to_i < (required_office_hours - 1) %>
+            <div class="todays-hours-comparison">Your logged hours are not complete</div>
+        <% end %>
+      </div>
+    </div>
+    <div class="clear-left"></div>
+
+
+    <div class="time-entries-wrapper">
+      <h2>Today's Tasks</h2>
+      <table class="list">
+        <thead>
+        <tr>
+          <th class="center">S #</th>
+          <th class="center">Issue #</th>
+          <th>Status</th>
+          <th>Project</th>
+          <th>Subject</th>
+          <th class="center">Logged Hours</th>
+          <th class="center">Activity</th>
+          <th>Comments</th>
+        </tr>
+        </thead>
+        <tbody>
+        <%
+           #already_displayed = []
+           i= 0
+           @time_entries.each do |entry|
+
+             #unless already_displayed.include?entry.issue_id
+
+               time = [0,0]
+               time = decimal_to_time(entry.hours) if entry.hours
+
+        %>
+                <tr class="<%= i%2 == 0?"even":"odd" %>">
+                  <td class="center"><%= i = i + 1  %></td>
+                  <td class="center"><%= entry.issue_id  %></td>
+                  <% if entry.issue %>
+                      <td><%= entry.issue.status.name %></td>
+                      <td><%= entry.issue.project.name %></td>
+                      <td><%= entry.issue.subject %></td>
+                  <% end %>
+                  <td class="center" width="150">
+                    <%= entry.hours %>
+                  </td>
+                  <td class="center"><%= entry.activity.name %></td>
+                  <td><%= entry.comments %></td>
+                </tr>
+            <%
+               #already_displayed << entry.issue_id
+               #end
+               end %>
+        </tbody>
+      </table>
+
+    </div>
+
+    <div class="task-report-actions">
+
+      <div class="form-control">
+        <label>Remarks</label>
+        <div class="control-wrapper">
+          <%= @task_report.remarks %>
+        </div>
+      </div>
+
+    </div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<% content_for :sidebar do %>
+    <%  render :partial => 'issues/sidebar' %>
+<% end %>
+
+<%= render :partial => 'task_reports/assets' %>

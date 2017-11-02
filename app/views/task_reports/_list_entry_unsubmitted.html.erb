@@ -1,0 +1,10 @@
+    <td><%= "#{@report_user.name}" %></td>
+    <td><%= "#{date.strftime("%A, %d-%b-%y")}" %></td>
+    <td colspan="4" class="centered"><%= "#{unsubmitted_report_status date }" %></td>
+    <td class="centered">
+      <% unless off_day? date %>
+          <% if !modification_time_expired? date and @report_user.id == User.current.id %>
+              <a href="<%="#{new_task_report_path(:report_for_day => date)}"%>" class="icon icon-add">&nbsp;</a>
+          <% end %>
+      <% end %>
+    </td>

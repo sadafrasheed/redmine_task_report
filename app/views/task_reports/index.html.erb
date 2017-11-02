@@ -1,0 +1,80 @@
+<%
+   title = "#{@report_user.name}'s Task Reports"
+   html_title( title )
+
+%>
+
+
+<h2><%= title %></h2>
+
+
+<%= render :partial => 'task_reports/search_form' %>
+
+<hr />
+
+<%
+   three_days_ago = 2.days.ago.to_date
+
+%>
+
+<table class="table-fill">
+  <tr>
+    <th>Task Report By</th>
+    <th>Date</th>
+    <th>Status</th>
+    <th>Working Hours</th>
+    <th>Logged Hours</th>
+    <th>Free Hours</th>
+    <th>Actions</th>
+  </tr>
+  <% # (@from .. @to).each do |date| %>
+  <% @to.downto(@from) do |date| %>
+
+      <%
+
+         css_class = ""
+         if @task_reports[date]
+           result = compare_hours(@task_reports[date].total_logged_hours)
+           if result == -1
+                css_class = "less-hours"
+           end
+         elsif unsubmitted_report_status( date ) == "Pending"
+           css_class = "pending-report"
+         else
+            css_class = ""
+         end
+      %>
+
+      <tr class="<%= css_class %>">
+
+      <%= if @task_reports[date]
+        render :partial => 'list_entry_submitted', :locals => { :date => date }
+      else
+        render :partial => 'list_entry_unsubmitted', :locals => { :date => date}
+      end %>
+
+
+
+
+
+  </tr>
+  <% end %>
+</table>
+
+
+
+    <br />
+
+
+
+
+
+
+
+
+
+<% content_for :sidebar do %>
+    <%  render :partial => 'issues/sidebar' %>
+<% end %>
+
+<%= render :partial => 'task_reports/assets' %>

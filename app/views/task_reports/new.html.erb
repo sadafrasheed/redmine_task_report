@@ -1,0 +1,19 @@
+<%
+    time = @task_report.report_for_day.to_date
+    title = "Create Daily Task Report for #{time.strftime "%A, %d-%b-%y"}"
+    html_title( title )
+
+%>
+
+
+<h2><%= title %></h2>
+
+
+<%= render :partial => 'task_reports/form' %>
+
+
+<% content_for :sidebar do %>
+    <%  render :partial => 'issues/sidebar' %>
+<% end %>
+
+<%= render :partial => 'task_reports/assets' %>

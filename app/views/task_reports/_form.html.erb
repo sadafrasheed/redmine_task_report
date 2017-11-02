@@ -1,0 +1,224 @@
+<% required_hours = "#{required_office_hours} hrs" %>
+
+
+<div class="form-wrapper">
+
+<%= form_for @task_report do |f| %>
+
+    <%= f.hidden_field :total_short_leaves %>
+    <%= f.hidden_field :total_extra_hours %>
+    <%= f.hidden_field :total_working_hours %>
+    <%= f.hidden_field :total_logged_hours %>
+    <%= f.hidden_field :total_free_hours %>
+
+
+  <div id="task-report-entries">
+
+    <div class="form-control">
+      <%= f.label :user_id,'Report by', :class => ' control-label' %>
+      <div class="control-wrapper">
+        <%= f.hidden_field :user_id %>
+        <%= User.current.name %>
+      </div>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :report_for_day,'Date', :class => ' control-label' %>
+      <div class="control-wrapper">
+        <%= f.text_field :report_for_day, :class => ' datepicker validate[required]' %>
+      </div>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :start_time,'Time', :class => ' control-label' %>
+      <div class="control-wrapper"><div class="control-group">
+        <%= f.text_field :time_from, :class => ' timepicker validate[required]' %> -
+        <%= f.text_field :time_to, :class => ' timepicker validate[required]' %>
+        <input type="text" class="working-hours" readonly="readonly" class="readonly" />
+      </div></div>
+    </div>
+
+
+    <div class="more-options-wrapper">
+
+
+        <!-- <div class="form-control">
+          <%= f.check_box :worked_from_home %> <%= f.label :worked_from_home,'I have worked from Home' %>
+          <div class="reason-wrapper">
+            <%= f.text_area :wfh_reason, {:rows => 3, :cols=>50, :placeholder => 'Enter reason for working from home'} %>
+          </div>
+        </div> -->
+
+
+        <div class="short-leaves-section form-control">
+          <div class="">
+            <input type="checkbox" id="short-leaves-chk"><label for="short-leaves-chk">I have availed a short leave</label>
+          </div>
+          <div class="short-leave-controls-wrapper">
+            <%= f.fields_for :task_report_short_leaves do |sl_builder| %>
+                <div class="">
+                    <%= sl_builder.label :start_time,'When', :class => 'control-label' %>
+                    <div class="control-wrapper">
+                        <div class="control-group">
+                            <%= sl_builder.text_field :start_time, :class => ' timepicker  validate[funcCall[checkEndTime]]'  %> -
+                            <%= sl_builder.text_field :end_time, :class => ' timepicker  validate[funcCall[checkStartTime]]'  %>
+                            <input type="text" class="short-leaves-total-hours" readonly="readonly" class="readonly" />
+                        </div>
+                        <div>
+                          <span class="add-short-leaves-group">Add Another</span>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+          </div>
+        </div>
+
+
+        <div class="extra-hours-section form-control">
+          <div class="">
+            <input type="checkbox" id="extra-hours-chk"><label for="extra-hours-chk">I have worked extra today</label>
+          </div>
+          <div class="extra-hours-controls-wrapper">
+            <%= f.fields_for :task_report_extra_hours do |eh_builder| %>
+                <div class="">
+                  <%= eh_builder.label :start_time,'When', :class => 'control-label' %>
+                  <div class="control-wrapper">
+                    <div class="control-group">
+                      <%= eh_builder.text_field :start_time, :class => ' timepicker validate[funcCall[checkEndTime]]'  %> -
+                      <%= eh_builder.text_field :end_time, :class => ' timepicker validate[funcCall[checkStartTime]]'  %>
+                      <input type="text" class="extra-hours-total-hours" readonly="readonly" class="readonly" />
+                    </div>
+                    <div>
+                      <span class="add-extra-hours-group">Add Another</span>
+                    </div>
+                  </div>
+                </div>
+            <% end %>
+          </div>
+        </div>
+
+    </div>
+
+    <div class="more-options-toggle">More Options...</div>
+
+
+
+  </div>
+  <div id="task-report-summary-wrapper">
+       <div id="task-report-summary">
+
+         <div id="working-hours">
+           <span class="label">Total Working Hours:</span>
+           <span></span>
+         </div>
+
+<!--     <div id="required-hours">
+           <span class="label">Required Hours:</span>
+           <span><%= required_hours %></span>
+         </div>-->
+
+         <div id="office-hours">
+           <span class="label">Office Hours:</span>
+           <span></span>
+         </div>
+
+         <div id="short-leaves-logged">
+           <span class="label">Short Leaves:</span>
+           <span></span>
+         </div>
+
+         <div id="extra-hours-logged">
+           <span class="label">Extra Hours:</span>
+           <span></span>
+         </div>
+
+         <div id="logged-hours">
+           <span class="label">Logged Hours:</span>
+           <span></span>
+         </div>
+
+         <div id="free-hours">
+           <span class="label">Free Hours:</span>
+           <span></span>
+         </div>
+
+
+         <hr />
+         <!--<div id="status-less-hours">You have <span><%= required_hours %></span> less than required</div>
+         <div id="status-complete-hours">You have completed your working hours.</div>-->
+         <div class="todays-hours-comparison">Your hours are not complete yet</div>
+       </div>
+  </div>
+  <div class="clear-left"></div>
+
+
+  <div class="time-entries-wrapper">
+    <h2>Today's Tasks</h2>
+    <table class="list">
+      <thead>
+        <tr>
+          <th class="center">S #</th>
+          <th class="center">Issue #</th>
+          <th>Status</th>
+          <th>Project</th>
+          <th>Subject</th>
+          <th class="center">Hours To Log</th>
+          <th class="center">Activity</th>
+          <th>Comments</th>
+        </tr>
+      </thead>
+      <tbody>
+    <%
+       #already_displayed = []
+       i= 0
+       @time_entries.each do |entry|
+
+       #unless already_displayed.include?entry.issue_id
+
+         time = [0,0]
+         time = decimal_to_time(entry.hours) if entry.hours
+
+    %>
+          <tr class="<%= i%2 == 0?"even":"odd" %>">
+            <td class="center"><%= i = i + 1  %></td>
+            <td class="center"><%= entry.issue_id  %></td>
+            <% if entry.issue %>
+            <td><%= entry.issue.status.name %></td>
+            <td><%= link_to( entry.issue.project.name, project_url(entry.issue.project), :target => '_blank' )  %></td>
+            <td><%= link_to( entry.issue.subject, issue_url(entry.issue), :target => '_blank' )  %></td>
+            <% end %>
+            <td class="center" width="150">
+              <%= select_tag "hours_worked_#{entry.issue_id}", options_for_select((0..8).to_a.map{|n| ["#{n}", n]  }, time[0]),  :disabled => entry.hours ? "disabled":false %>:
+              <%= select_tag "minutes_worked_#{entry.issue_id}", options_for_select((0..55).step(5).to_a.map{|n| ["%02d" % n, "#{n}" ]  }, time[1]),  :disabled => entry.hours ? "disabled":false %>
+              <%= hidden_field "time_entry[#{entry.issue_id}]", :hours, :value => entry.hours, :disabled => entry.hours ? "disabled":false %>
+            </td>
+            <td class="center"><%= collection_select "time_entry[#{entry.issue_id}]", :activity_id, Enumeration.where({'type'=>'TimeEntryActivity'}).find_all(), :id, :name, {:selected => entry.activity_id, :prompt => "Choose Activity"}, {:disabled => entry.hours ? "disabled":false, :class => "validate[funcCall[checkIssueHours]]"} %></td>
+            <td><%= text_field "time_entry[#{entry.issue_id}]", :comments, :value => entry.comments, :disabled => entry.hours ? "disabled":false, :class => "validate[funcCall[checkIssueHours]]" %></td>
+          </tr>
+    <%
+            #already_displayed << entry.issue_id
+       #end
+       end %>
+      </tbody>
+    </table>
+
+  </div>
+
+  <div class="task-report-actions">
+
+    <div class="form-control">
+      <%= f.label :remarks,'Remarks', :class => 'control-label' %>
+      <div class="control-wrapper">
+        <%= f.text_area :remarks, rows: 3, cols: 80 %>
+      </div>
+    </div>
+
+    <div class="form-control center">
+      <%= link_to 'Back', :back ,class: 'btn btn-default' %>
+      <%= f.button 'Submit Task Report', class: 'btn btn-primary'  %>
+    </div>
+
+  </div>
+
+<% end %>
+</div>

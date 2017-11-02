@@ -1,0 +1,35 @@
+<div class="search-form-wrapper">
+
+<%= form_tag task_reports_path, :method => 'get', :id=>'task-reports-search-form'  do %>
+
+  <% if can_view_others_reports? %>
+    <div class="form-control">
+      <%= label_tag :user_id,'Report by', :class => ' control-label' %>
+      <div class="control-wrapper">
+        <% #collection_select :time_entry, :user_id, @searchable_users, :id, :name, {:selected => @user_id, :prompt => "Select User"}, {:class => ""} %>
+        <%= select_tag "user_id", options_from_collection_for_select( @searchable_users, :id, :name,@user_id), {:prompt => "Select User"} %>
+
+      </div>
+    </div>
+  <% end %>
+
+
+  <div class="form-control">
+    <%= label_tag :date_range,'Date Range', :class => ' control-label' %>
+    <div class="control-wrapper">
+      <%= select_tag "date_range", options_for_select( ["This Week", "Last Week", "This Month", "Last Month","Last 30 Days", "Custom"], @date_range ) %>
+
+      <div class="custom-date-range-wrapper" style="<%= params[:date_range] == 'Custom'? 'display:block;':'' %> ">
+          <%= text_field_tag :from_day, @from.strftime("%d-%b-%Y"), :class => ' datepicker'  %> -
+          <%= text_field_tag :to_day, @to.strftime("%d-%b-%Y"), :class => ' datepicker' %>
+      </div>
+    </div>
+  </div>
+  <div>
+    <a class="icon icon-checked" href="#" onclick="document.getElementById('task-reports-search-form').submit();return false;">Apply</a>
+    <a href="<%="#{task_reports_path}"%>" class="icon icon-reload">Reset</a>
+  </div>
+
+<% end %>
+
+</div>
